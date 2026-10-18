@@ -70,6 +70,26 @@ uv run src/agente_decentralizado.py
 
 Para salir, escribir `Bye`.
 
+## MCP + A2A
+
+Las herramientas (`buscar_faq`, `consultar_clima`, `calendarizar_cita`) se exponen en un servidor MCP con transporte Streamable HTTP, y el sistema multiagente jerárquico se expone como un solo agente A2A (con una skill por funcionalidad) cuyos especialistas consumen esas herramientas vía MCP. La terminal es un cliente A2A.
+
+```mermaid
+graph LR
+    CLI[cliente_a2a.py] -->|A2A JSON-RPC :9999| A2A[servidor_a2a.py<br/>SupervisorGlobal + especialistas]
+    A2A -->|MCP Streamable HTTP :8001| MCP[servidor_mcp.py]
+```
+
+Con PostgreSQL activo y la base de conocimientos cargada, en tres terminales (en este orden):
+
+```sh
+uv run src/servidor_mcp.py   # http://127.0.0.1:8001/mcp
+uv run src/servidor_a2a.py   # http://127.0.0.1:9999 (Agent Card en /.well-known/agent-card.json)
+uv run src/cliente_a2a.py
+```
+
+Variables opcionales: `MCP_URL`, `A2A_HOST`, `A2A_PORT` (servidor A2A) y `A2A_URL` (cliente).
+
 ## Evals (promptfoo)
 
 Los evals se ejecutan sobre el agente jerárquico (la arquitectura elegida como la mejor en la hoja anterior) y cubren ambas funcionalidades (FAQs y citas) con aserciones de:
